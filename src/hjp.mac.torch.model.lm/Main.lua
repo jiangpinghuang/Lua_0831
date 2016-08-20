@@ -240,25 +240,73 @@ local function run_test()
   
 end
 
+local function main()
+  
+  g_init_gpu(arg)
+  
+  state_train   = {data = transfer_data(ptb.train_data_set(params.batch_size))}
+  state_valid   = {data = transfer_data(ptb.valid_data_set(params.batch_size))}
+  state_test    = {data = transfer_data(ptb.test_data_set(params.batch_size))}
+  
+  print("Network parameters: ")
+  print(params)
+  
+  local states = {state_train, state_valid, state_test}
+  
+  for _, state in pairs(states) do
+    reset_state(state)
+  end
+  
+  setup()
+  
+  local step            = 0
+  local epoch           = 0
+  local total_cases     = 0
+  local begin_time      = torch.tic()
+  local start_time      = torch.tic()
+  
+  print("Start training...")
+  
+  local words_per_step  = params.seq_length * params.batch_size
+  local epoch_size = torch.floor(state_train.data:size(1) / params.seq_length)
+  local perps
+  
+  while epoch < params.m_max_epoch do
+    local perp = forward_propagation(state_train)
+    if perps == nil then
+      perps = torch.zeros(epoch_size):add(perp)
+    end
+    perps[step % epoch_size + 1] = perp
+    step = step + 1
+    backward_propagation(state_train)
+    total_cases = total_cases + params.seq_length * params.batch_size
+    epoch = step / epoch_size
+    if step % torch.round(epoch_size / 10) == 10 then
+      local wps = torch.floor(total_cases / torch.toc(start_time))
+      local since_begin = g_d(torch.toc(begin_time) / 60)
+      print('epoch = ' .. g_f3(epoch) .. 
+            ', train perp = ' .. g_f3(torch.exp(perps:mean())) .. 
+            ', wps = ' .. wps ..
+            ', dw:norm() = ' .. g_f3(model.norm_dw) .. 
+            ', lr = ' .. g_f3(params.lr) .. 
+            ', since begin = ' .. since_begin .. ' mins.'
+            )
+    end
+    if step % epoch_size == 0 then
+      run_valid()
+      if epoch > params.max_epoch then
+        params.lr = params.lr / params.decay
+      end
+    end
+    if step % 33 == 0 then
+      cutorch.synchronize()
+      collectgarbage()
+    end
+  end
+  
+  run_test()  
+  print("Training is over.")
+  
+end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+main()
