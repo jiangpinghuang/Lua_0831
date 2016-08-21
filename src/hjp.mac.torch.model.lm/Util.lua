@@ -9,7 +9,7 @@
 local stringx   = require('pl.stringx')
 local file      = require('pl.file')
 
-local ptb_path  = "./data/"
+local ptb_path  = "/home/hjp/Workshop/Model/lstm/data/"
 
 local vocab_idx = 0
 local vocab_map = {}
@@ -48,19 +48,19 @@ local function load_data(fname)
 end
 
 local function train_data_set(batch_size)
-  local x = load_data(ptb_path .. "ptb.train.txt")
+  local x = load_data(ptb_path .. "pit.train.txt")
   x = replicate(x, batch_size)
   return x
 end
 
 local function test_data_set(batch_size)
-  local x = load_data(ptb_path .. "ptb.test.txt")
+  local x = load_data(ptb_path .. "pit.test.txt")
   x = x:resize(x:size(1), 1):expand(x:size(1), batch_size)
   return x
 end
 
 local function valid_data_set(batch_size)
-  local x = load_data(ptb_path .. "ptb.valid.txt")
+  local x = load_data(ptb_path .. "pit.valid.txt")
   x = replicate(x, batch_size)
   return x
 end

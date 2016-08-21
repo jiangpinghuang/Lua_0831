@@ -24,9 +24,9 @@ else
 end
 
 require('nngraph')
-require('base')
+require('Model')
 
-local ptb = require('data')
+local ptb = require('Util')
 
 local params = {
           batch_size  = 20,
