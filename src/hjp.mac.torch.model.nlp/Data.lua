@@ -9,7 +9,7 @@
 local stringx   = require('pl.stringx')
 local file      = require('pl.file')
 
-local data_path = "/home/hjp/Workshop/Model/data/aaai/"
+local data_path = "../Workshop/Model/data/aaai/"
 
 local vocab_idx = 0
 local vocab_map = {}

@@ -30,17 +30,17 @@ local data = require('Data')
 
 local params = {
           batch_size  = 20,
-          seq_length  = 35,
+          seq_length  = 20,
           layers      = 2,
-          decay       = 1.15,
-          rnn_size    = 1500,
-          dropout     = 0.65,
-          init_weight = 0.04,
-          lr          = 1,
+          decay       = 0.5,
+          rnn_size    = 200,
+          dropout     = 0.5,
+          init_weight = 0.05,
+          lr          = 0.1,
           vocab_size  = 10000,
-          max_epoch   = 14,
-          Max_epoch   = 55,
-          grad_norm   = 10
+          max_epoch   = 5,
+          Max_epoch   = 10,
+          grad_norm   = 5
 }
 
 local function transfer_data(x)
