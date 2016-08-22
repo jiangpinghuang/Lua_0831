@@ -196,7 +196,8 @@ local function run_valid()
   for i = 1, len do
     prep = prep + forward_propagation(state_valid)
   end
-  
+  print("prep: " .. prep)
+  print("len: " .. len)
   print("Validation set perplexity : " ..  g_f3(torch.exp(prep / len)))  
   g_enalbe_dropout(model.rnns)  
 end

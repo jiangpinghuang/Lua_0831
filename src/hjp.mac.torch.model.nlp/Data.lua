@@ -9,7 +9,7 @@
 local stringx   = require('pl.stringx')
 local file      = require('pl.file')
 
-local data_path = "../Workshop/Model/data/aaai/"
+local data_path = "/home/hjp/Workshop/Model/data/aaai/"
 
 local vocab_idx = 0
 local vocab_map = {}
@@ -48,19 +48,19 @@ local function load_data(fname)
 end
 
 local function train_data_set(batch_size)
-  local x = load_data(data_path .. "ptb.train.txt")
+  local x = load_data(data_path .. "pit.train.txt")
   x = replicate(x, batch_size)
   return x
 end
 
 local function test_data_set(batch_size)
-  local x = load_data(data_path .. "ptb.test.txt")
+  local x = load_data(data_path .. "pit.test.txt")
   x = x:resize(x:size(1), 1):expand(x:size(1), batch_size)
   return x
 end
 
 local function valid_data_set(batch_size)
-  local x = load_data(data_path .. "ptb.valid.txt")
+  local x = load_data(data_path .. "pit.valid.txt")
   x = replicate(x, batch_size)
   return x
 end
