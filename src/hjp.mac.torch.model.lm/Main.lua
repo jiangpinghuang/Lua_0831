@@ -1,9 +1,9 @@
---[[ 
--- Copyright (c) 2016, by Author.
+--[[
+-- Copyright (c) 2016, by Jiang.ping.Huang.
 -- All rights reserved.
 
 -- Neural language model for normalization, based on long short-term memory.
--- LICENSE file in the root directory of this source folder.
+-- LICENSE file will be added in the root directory of this source folder.
 ]]--
 
 local ok, cunn = pcall(require, 'fbcunn')
@@ -24,10 +24,9 @@ else
 end
 
 require('nngraph')
-require('base')
+require('Model')
 
-local ptb = require('data')
-
+local data = require('Data')
 local params = {
           batch_size  = 20,
           seq_length  = 35,
@@ -39,8 +38,8 @@ local params = {
           lr          = 1,
           vocab_size  = 10000,
           max_epoch   = 14,
-          m_max_epoch = 55,
-          m_grad_norm = 10
+          Max_epoch   = 55,
+          grad_norm   = 10
 }
 
 local function transfer_data(x)
@@ -65,14 +64,11 @@ local function lstm(x, prev_c, prev_h)
         nn.CMulTable()({forget_gate, prev_c}),
         nn.CMulTable()({in_gate, in_transform})
   })
-  local next_h          = nn.CMulTable()({out_gate, nn.Tanh()(next_c)})
-  
-  return next_c, next_h
-  
+  local next_h          = nn.CMulTable()({out_gate, nn.Tanh()(next_c)})  
+  return next_c, next_h  
 end
 
 local function create_network()
-
   local x               = nn.Identity()()
   local y               = nn.Identity()()
   local prev_s          = nn.Identity()()
@@ -97,13 +93,11 @@ local function create_network()
   local module          = nn.gModule({x, y, prev_s}, {err, nn.Identity()(next_s)})
   
   module:getParameters():uniform(-params.init_weight, params.init_weight)
-  
-  return transer_data(module)
-  
+    
+  return transer_data(module)  
 end
 
 local function setup()
-
   print("Creating a RNN LSTM network.")
   
   local core_network    = create_network()
@@ -128,20 +122,17 @@ local function setup()
   model.core_network = core_network
   model.rnns = g_cloneManyTimes(core_network, params.seq_length)
   model.norm_dw = 0
-  model.err = transfer_data(torch.zeros(params.seq_length))
-  
+  model.err = transfer_data(torch.zeros(params.seq_length))  
 end
 
 local function reset_state(state)
-
   state.pos = 1
   
   if model ~= nil and model.start_s ~= nil then
     for d = 1, 2 * params.layers do
       model.start_s[d]:zero()
     end
-  end
-  
+  end  
 end
 
 local function reset_ds()
@@ -151,7 +142,6 @@ local function reset_ds()
 end
 
 local function forward_propagation(state)
-
   g_replace_table(model.s[0], model.start_s)
   
   if state.pos + params.seq_length > state.data:size(1) then
@@ -168,12 +158,10 @@ local function forward_propagation(state)
   
   g_replace_table(model.start_s, model.s[params.seq_length])
   
-  return model.err:mean()
-  
+  return model.err:mean()  
 end
 
 local function back_propagation(state)
-
   paramdx:zero()
   reset_ds()
   
@@ -196,12 +184,10 @@ local function back_propagation(state)
     paramdx:mul(shrink_factor)
   end
  
-  paramx:add(paramdx:mul(-params.lr)) 
-  
+  paramx:add(paramdx:mul(-params.lr))  
 end
 
-local function run_valid()
-  
+local function run_valid()  
   reset_state(state_valid)
   g_disable_dropout(model.rnns)
   
@@ -213,12 +199,10 @@ local function run_valid()
   end
   
   print("Validation set perplexity : " ..  g_f3(torch.exp(prep / len)))  
-  g_enalbe_dropout(model.rnns)
-  
+  g_enalbe_dropout(model.rnns)  
 end
 
 local function run_test()
-
   reset_state(state_test)
   g_disable_dropout(model.rnns)
   
@@ -236,12 +220,10 @@ local function run_test()
   end
   
   print("Test set perplexity : " .. g_f3(torch.exp(perp / (len - 1))))
-  g_enable_dropout(model.rnns)
-  
+  g_enable_dropout(model.rnns)  
 end
 
-local function main()
-  
+local function main()  
   g_init_gpu(arg)
   
   state_train   = {data = transfer_data(ptb.train_data_set(params.batch_size))}
@@ -305,8 +287,7 @@ local function main()
   end
   
   run_test()  
-  print("Training is over.")
-  
+  print("Training is over.")  
 end
 
 main()
