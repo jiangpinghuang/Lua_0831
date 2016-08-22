@@ -26,7 +26,7 @@ end
 require('nngraph')
 require('Model')
 
-local data = require('Data')
+local pit = require('Data')
 
 local params = {
           batch_size  = 20,
@@ -226,9 +226,9 @@ end
 local function main()  
   g_init_gpu(arg)
   
-  state_train   = {data = transfer_data(ptb.train_data_set(params.batch_size))}
-  state_valid   = {data = transfer_data(ptb.valid_data_set(params.batch_size))}
-  state_test    = {data = transfer_data(ptb.test_data_set(params.batch_size))}
+  state_train   = {data = transfer_data(pit.train_data_set(params.batch_size))}
+  state_valid   = {data = transfer_data(pit.valid_data_set(params.batch_size))}
+  state_test    = {data = transfer_data(pit.test_data_set(params.batch_size))}
   
   print("Network parameters: ")
   print(params)
