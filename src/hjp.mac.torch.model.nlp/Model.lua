@@ -40,7 +40,7 @@ function g_cloneManyTimes(net, T)
   for t = 1, T do
     local reader = torch.MemoryFile(mem:storage(), "r"):binary()
     local clone = reader:readObject()
-    reader:clone()
+    reader:close()
     local cloneParams, cloneGradParams = clone:parameters()
     for i = 1, #params do
       cloneParams[i]:set(params[i])

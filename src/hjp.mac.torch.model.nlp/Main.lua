@@ -26,17 +26,17 @@ end
 require('nngraph')
 require('Model')
 
-local pit = require('Data')
+local ptb = require('Data')
 
 local params = {
           batch_size  = 20,
           seq_length  = 20,
           layers      = 2,
-          decay       = 0.5,
+          decay       = 2,
           rnn_size    = 200,
-          dropout     = 0.5,
-          init_weight = 0.05,
-          lr          = 0.1,
+          dropout     = 0,
+          init_weight = 0.1,
+          lr          = 1,
           vocab_size  = 10000,
           max_epoch   = 5,
           Max_epoch   = 10,
@@ -102,7 +102,7 @@ local function setup()
   
   local core_network    = create_network()
   
-  paramx, paramdx       = core_network:getparameters()
+  paramx, paramdx       = core_network:getParameters()
   model.s               = {}
   model.ds              = {}
   model.start_s         = {}
@@ -136,7 +136,7 @@ local function reset_state(state)
 end
 
 local function reset_ds()
-  for d = 1, #model_ds do
+  for d = 1, #model.ds do
     model.ds[d]:zero()
   end
 end
@@ -152,7 +152,7 @@ local function forward_propagation(state)
     local x = state.data[state.pos]
     local y = state.data[state.pos + 1]
     local s = model.s[i - 1]
-    model.err[i], model.s[i] = unpack(model.rnns[i]:forward({x, y, x}))
+    model.err[i], model.s[i] = unpack(model.rnns[i]:forward({x, y, s}))
     state.pos = state.pos + 1
   end
   
@@ -160,7 +160,7 @@ local function forward_propagation(state)
   return model.err:mean()  
 end
 
-local function back_propagation(state)
+local function backward_propagation(state)
   paramdx:zero()
   reset_ds()
   
@@ -178,8 +178,8 @@ local function back_propagation(state)
   state.pos = state.pos + params.seq_length
   model.norm_dw = paramdx:norm()
   
-  if model.norm_dw > params.max_grad_norm then
-    local shrink_factor = params.max_grad_norm / model.norm_dw
+  if model.norm_dw > params.grad_norm then
+    local shrink_factor = params.grad_norm / model.norm_dw
     paramdx:mul(shrink_factor)
   end
  
@@ -196,10 +196,12 @@ local function run_valid()
   for i = 1, len do
     prep = prep + forward_propagation(state_valid)
   end
-  print("prep: " .. prep)
-  print("len: " .. len)
+  print("prep: ")
+  print(prep)
+  print("len: ")
+  print(len)
   print("Validation set perplexity : " ..  g_f3(torch.exp(prep / len)))  
-  g_enalbe_dropout(model.rnns)  
+  g_enable_dropout(model.rnns)  
 end
 
 local function run_test()
@@ -226,9 +228,9 @@ end
 local function main()  
   g_init_gpu(arg)
   
-  state_train   = {data = transfer_data(pit.train_data_set(params.batch_size))}
-  state_valid   = {data = transfer_data(pit.valid_data_set(params.batch_size))}
-  state_test    = {data = transfer_data(pit.test_data_set(params.batch_size))}
+  state_train   = {data = transfer_data(ptb.train_data_set(params.batch_size))}
+  state_valid   = {data = transfer_data(ptb.valid_data_set(params.batch_size))}
+  state_test    = {data = transfer_data(ptb.test_data_set(params.batch_size))}
   
   print("Network parameters: ")
   print(params)
@@ -253,7 +255,7 @@ local function main()
   local epoch_size = torch.floor(state_train.data:size(1) / params.seq_length)
   local perps
   
-  while epoch < params.m_max_epoch do
+  while epoch < params.Max_epoch do
     local perp = forward_propagation(state_train)
     if perps == nil then
       perps = torch.zeros(epoch_size):add(perp)
