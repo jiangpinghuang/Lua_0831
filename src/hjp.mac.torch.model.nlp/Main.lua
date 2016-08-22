@@ -94,7 +94,7 @@ local function create_network()
   local module          = nn.gModule({x, y, prev_s}, {err, nn.Identity()(next_s)})
   
   module:getParameters():uniform(-params.init_weight, params.init_weight)    
-  return transer_data(module)  
+  return transfer_data(module)  
 end
 
 local function setup()
