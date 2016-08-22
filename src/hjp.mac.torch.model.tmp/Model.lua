@@ -51,7 +51,6 @@ function g_cloneManyTimes(net, T)
   end
   
   mem:close()  
-  
   return clones
 end
 
