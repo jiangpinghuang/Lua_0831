@@ -26,7 +26,7 @@ end
 require('nngraph')
 require('Model')
 
-local ptb = require('Data')
+local pit = require('Data')
 
 local params = {
           batch_size  = 20,
@@ -194,13 +194,13 @@ local function run_valid()
   local perp = 0
   
   for i = 1, len do
-    prep = prep + forward_propagation(state_valid)
+    perp = perp + forward_propagation(state_valid)
   end
-  print("prep: ")
-  print(prep)
+  print("perp: ")
+  print(perp)
   print("len: ")
   print(len)
-  print("Validation set perplexity : " ..  g_f3(torch.exp(prep / len)))  
+  print("Validation set perplexity : " ..  g_f3(torch.exp(perp / len)))  
   g_enable_dropout(model.rnns)  
 end
 
@@ -228,9 +228,9 @@ end
 local function main()  
   g_init_gpu(arg)
   
-  state_train   = {data = transfer_data(ptb.train_data_set(params.batch_size))}
-  state_valid   = {data = transfer_data(ptb.valid_data_set(params.batch_size))}
-  state_test    = {data = transfer_data(ptb.test_data_set(params.batch_size))}
+  state_train   = {data = transfer_data(pit.train_data_set(params.batch_size))}
+  state_valid   = {data = transfer_data(pit.valid_data_set(params.batch_size))}
+  state_test    = {data = transfer_data(pit.test_data_set(params.batch_size))}
   
   print("Network parameters: ")
   print(params)
